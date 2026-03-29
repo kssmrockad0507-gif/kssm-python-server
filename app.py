@@ -15,7 +15,7 @@ def home():
     return "Bot is Running Successfully!"
 
 # --- 1. உங்களது விபரங்கள் (ஏற்கனவே கொடுக்கப்பட்டது) ---
-GEMINI_API_KEY = "gen-lang-client-0562297962"
+GEMINI_API_KEY = "AIzaSyD4UOXQM5rFNPONUwXLMv4vp5So0btGsBM"
 BLOGGER_API_KEY = "AIzaSyDiLs0zT0cn_5LlRIXIqUUAjdpdqmBoAaI"
 BLOGGER_ID = "1288039139605091785"
 
