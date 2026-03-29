@@ -7,14 +7,14 @@ import os
 import threading
 from flask import Flask
 
-# Flask App setup (Render போர்ட் எரர் வராமல் இருக்க)
+# 1. Flask App setup (Render "Port Timeout" எரர் வராமல் இருக்க)
 app = Flask(__name__)
 
 @app.route('/')
 def home():
     return "KSSM AI Bot is Running Successfully!"
 
-# --- உங்களது சரியான விபரங்கள் ---
+# --- 2. உங்கள் விபரங்கள் ---
 API_KEY = "AIzaSyD4UOXQM5rFNPONUwXLMv4vp5So0btGsBM"
 BLOGGER_ID = "1288039139605091785"
 
@@ -31,7 +31,7 @@ def generate_educational_content():
         response = model.generate_content(prompt)
         content = response.text
         
-        # தலைப்பு மற்றும் உடற்பகுதியை பிரித்தல்
+        # தலைப்பு மற்றும் கட்டுரையை பிரித்தல்
         lines = content.split('\n')
         title = lines[0].replace('#', '').strip()
         body = "".join(lines[1:])
@@ -53,7 +53,7 @@ def post_to_blogger(title, content):
     try:
         response = requests.post(url, json=payload, params=params)
         if response.status_code == 200:
-            print(f"Successfully posted: {title}")
+            print(f"Successfully posted to Blogger: {title}")
         else:
             print(f"Failed to post. Status code: {response.status_code}")
             print(response.text)
@@ -66,23 +66,24 @@ def job():
     if title and content:
         post_to_blogger(title, content)
 
-# --- ஆட்டோமேஷன் செட்டிங்ஸ் ---
+# --- 3. ஆட்டோமேஷன் செட்டிங்ஸ் ---
 def run_scheduler():
-    # சர்வர் ரன் ஆன உடனே ஒரு போஸ்ட் போட
+    # சர்வர் ரன் ஆன உடனே டெஸ்ட்டிற்காக ஒரு போஸ்ட் போட
     job()
-    # தினமும் காலை 10:00 மணிக்கு போஸ்ட் செய்ய
+    # தினமும் காலை 10:00 மணிக்கு போஸ்ட் செய்ய (நேரத்தை மாற்றிக்கொள்ளலாம்)
     schedule.every().day.at("10:00").do(job)
     while True:
         schedule.run_pending()
         time.sleep(60)
 
-# --- மெயின் பங்க்ஷன் ---
+# --- 4. மெயின் பங்க்ஷன் (Render Fix) ---
 if __name__ == "__main__":
-    # ஷெட்யூலரை தனி த்ரெட்டில் ரன் செய்ய
+    # ஷெட்யூலரை தனி த்ரெட்டில் ரன் செய்ய (Background Task)
     scheduler_thread = threading.Thread(target=run_scheduler)
     scheduler_thread.daemon = True
     scheduler_thread.start()
     
-    # Render-க்காக இந்த போர்ட் செட்டிங் மிக முக்கியம்
+    # Render-க்கு தேவையான போர்ட் செட்டிங்ஸ்
+    # இது மிக முக்கியம்: host='0.0.0.0' மற்றும் port=10000
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
