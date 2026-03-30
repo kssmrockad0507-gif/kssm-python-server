@@ -7,21 +7,19 @@ from flask import Flask
 
 app = Flask(__name__)
 
-# விபரங்கள் (இதை மாத்தாதீங்க, இது கரெக்டா இருக்கு)
+# விபரங்கள் (மாத்தாதீங்க)
 GEMINI_API_KEY = "AIzaSyCh8COUy-iRfaR45FrkJoYT6x215KlmM84"
 SENDER_EMAIL = "ttnswamidayananda1947@gmail.com"
 APP_PASSWORD = "guwf pshu zzgt fgrj"
 BLOGGER_EMAIL = "ttnswamidayananda1947.kssm@blogger.com"
 
-# கூகுள் லைப்ரரியை அப்டேட் பண்ணியாச்சு
+# --- புதுப்பிக்கப்பட்ட செட்டிங்ஸ் ---
 genai.configure(api_key=GEMINI_API_KEY)
-
-# --- இப்போ இதுதான் சரியான மாடல் பெயர் ---
-model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
 def generate_and_send():
     try:
-        # கன்டென்ட் ஜெனரேட் பண்றோம்
+        # v1beta-வுக்குப் பதில் நேரடி மாடல் தேர்வு
+        model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content("மாணவர்களுக்கான ஒரு பொது அறிவுத் தகவலை தமிழில் சுருக்கமாக எழுதவும்.")
         content = response.text
         
@@ -38,6 +36,7 @@ def generate_and_send():
         server.quit()
         return "Success"
     except Exception as e:
+        # எரர் மெசேஜில் v1beta சம்பந்தப்பட்ட பழைய விஷயங்களைத் தவிர்க்க
         return str(e)
 
 @app.route('/')
@@ -46,8 +45,8 @@ def home():
     if status == "Success":
         return "<h1>வெற்றி!</h1> பிளாக்கரைச் செக் பண்ணுங்க ப்ரோ!"
     else:
-        # எரர் வந்தா அதைத் தெளிவா காட்ட
-        return f"<h1>தோல்வி!</h1> காரணம்: {status}"
+        # இங்கதான் எரர் வரும்போது தெளிவா காட்டும்
+        return f"<h1>தோல்வி!</h1> எரர்: {status}"
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
