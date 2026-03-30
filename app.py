@@ -7,7 +7,7 @@ from flask import Flask
 
 app = Flask(__name__)
 
-# ---------- உங்கள் விபரங்கள் ----------
+# விபரங்கள் (சரியாக உள்ளன)
 GEMINI_API_KEY = "AIzaSyA7dYLknwTxKbYntHgXeYURQ8lR2fO-45s"
 SENDER_EMAIL = "ttnswamidayananda1947@gmail.com"
 APP_PASSWORD = "guwf pshu zzgt fgrj"
@@ -15,25 +15,24 @@ BLOGGER_EMAIL = "ttnswamidayananda1947.kssm@blogger.com"
 
 def generate_and_send():
     try:
-        # லேட்டஸ்ட் v1 API URL (இப்போ இதுதான் ஒர்க் ஆகும்)
-        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+        # மாடல் பெயரில் 'latest' சேர்க்கப்பட்டுள்ளது - இதுதான் 404 எரரைத் தீர்க்கும்
+        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key={GEMINI_API_KEY}"
         
         headers = {'Content-Type': 'application/json'}
         data = {
-            "contents": [{"parts":[{"text": "மாணவர்களுக்கான ஒரு கல்வித் தகவலை தமிழில் 150 வார்த்தைகளில் சுருக்கமாக எழுதவும்."}]}]
+            "contents": [{"parts":[{"text": "மாணவர்களுக்கான ஒரு பொது அறிவுத் தகவலை தமிழில் சுருக்கமாக எழுதவும்."}]}]
         }
         
         response = requests.post(url, headers=headers, json=data)
         result = response.json()
         
-        # கன்டென்ட் எடுக்கும் முறை
         if 'candidates' in result:
             content = result['candidates'][0]['content']['parts'][0]['text']
             
             msg = MIMEMultipart()
             msg['From'] = SENDER_EMAIL
             msg['To'] = BLOGGER_EMAIL
-            msg['Subject'] = "KSSM AI Education Post"
+            msg['Subject'] = "KSSM AI Special Update"
             msg.attach(MIMEText(content, "plain", "utf-8"))
 
             server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -43,16 +42,16 @@ def generate_and_send():
             server.quit()
             return "Success"
         else:
-            return f"Error: {str(result)}"
+            return f"Google Reply: {str(result)}"
             
     except Exception as e:
-        return str(e)
+        return f"System Error: {str(e)}"
 
 @app.route('/')
 def home():
     status = generate_and_send()
     if status == "Success":
-        return "<h1>✅ வெற்றி!</h1> பிளாக்கரைச் செக் பண்ணுங்க ப்ரோ!"
+        return "<h1>✅ வெற்றி!</h1> பிளாக்கரை செக் பண்ணுங்க ப்ரோ!"
     else:
         return f"<h1>தோல்வி!</h1> காரணம்: {status}"
 
