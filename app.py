@@ -1,4 +1,4 @@
-import google.generativeai as genai
+import requests
 import smtplib
 import os
 from email.mime.text import MIMEText
@@ -7,26 +7,31 @@ from flask import Flask
 
 app = Flask(__name__)
 
-# விபரங்கள் (மாத்தாதீங்க)
+# விபரங்கள்
 GEMINI_API_KEY = "AIzaSyCh8COUy-iRfaR45FrkJoYT6x215KlmM84"
 SENDER_EMAIL = "ttnswamidayananda1947@gmail.com"
 APP_PASSWORD = "guwf pshu zzgt fgrj"
 BLOGGER_EMAIL = "ttnswamidayananda1947.kssm@blogger.com"
 
-# --- புதுப்பிக்கப்பட்ட செட்டிங்ஸ் ---
-genai.configure(api_key=GEMINI_API_KEY)
-
 def generate_and_send():
     try:
-        # v1beta-வுக்குப் பதில் நேரடி மாடல் தேர்வு
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content("மாணவர்களுக்கான ஒரு பொது அறிவுத் தகவலை தமிழில் சுருக்கமாக எழுதவும்.")
-        content = response.text
+        # நேரடி API அழைப்பு (Direct API Call) - இது வெர்ஷன் பிரச்சனையைத் தீர்க்கும்
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+        headers = {'Content-Type': 'application/json'}
+        data = {
+            "contents": [{"parts":[{"text": "மாணவர்களுக்கான ஒரு பொது அறிவுத் தகவலை தமிழில் சுருக்கமாக எழுதவும்."}]}]
+        }
+        
+        response = requests.post(url, headers=headers, json=data)
+        result = response.json()
+        
+        # கன்டென்ட் எடுக்கும் முறை
+        content = result['candidates'][0]['content']['parts'][0]['text']
         
         msg = MIMEMultipart()
         msg['From'] = SENDER_EMAIL
         msg['To'] = BLOGGER_EMAIL
-        msg['Subject'] = "KSSM AI Special Update"
+        msg['Subject'] = "KSSM AI Education Post"
         msg.attach(MIMEText(content, 'plain'))
 
         server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -36,7 +41,6 @@ def generate_and_send():
         server.quit()
         return "Success"
     except Exception as e:
-        # எரர் மெசேஜில் v1beta சம்பந்தப்பட்ட பழைய விஷயங்களைத் தவிர்க்க
         return str(e)
 
 @app.route('/')
@@ -45,7 +49,6 @@ def home():
     if status == "Success":
         return "<h1>வெற்றி!</h1> பிளாக்கரைச் செக் பண்ணுங்க ப்ரோ!"
     else:
-        # இங்கதான் எரர் வரும்போது தெளிவா காட்டும்
         return f"<h1>தோல்வி!</h1> எரர்: {status}"
 
 if __name__ == "__main__":
